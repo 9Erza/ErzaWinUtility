@@ -1,32 +1,94 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Input;
 using ErzaWinUtility.MVVM.Views;
 
 namespace ErzaWinUtility
 {
+    /// <summary>
+    /// Logic for the main application window.
+    /// Manages navigation, window state, and global logging system.
+    /// </summary>
     public partial class MainWindow : Window
     {
-        private static MainWindow _instance;
+        // Static instance allows global access to the UI logger from any service or view.
+        private static MainWindow? _instance;
 
         public MainWindow()
         {
             InitializeComponent();
             _instance = this;
-            MainFrame.Content = new OptimizeView(); // Widok startowy
-            Log("SYSTEM", "New project core initialized.");
+
+            // Initialize window control buttons
+            InitializeWindowControls();
+
+            // Set the default startup view
+            ViewContainer.Content = new OptimizeView();
+
+            Log("SYSTEM", "Erza Utility Engine initialized successfully.");
         }
 
-        public static void Log(string tag, string message)
+        /// <summary>
+        /// Registers event handlers for custom title bar and system buttons.
+        /// </summary>
+        private void InitializeWindowControls()
         {
-            _instance?.Dispatcher.Invoke(() => {
-                _instance.LogTerminal.AppendText($"[{DateTime.Now:HH:mm:ss}] [{tag}] {message}\n");
-                _instance.LogTerminal.ScrollToEnd();
+            if (BtnClose != null)
+                BtnClose.Click += (s, e) => Application.Current.Shutdown();
+
+            if (BtnMinimize != null)
+                BtnMinimize.Click += (s, e) => this.WindowState = WindowState.Minimized;
+
+            if (TitleBar != null)
+            {
+                TitleBar.MouseLeftButtonDown += (s, e) =>
+                {
+                    if (e.LeftButton == MouseButtonState.Pressed) DragMove();
+                };
+            }
+        }
+
+        /// <summary>
+        /// Global logging method to display messages in the UI terminal.
+        /// Thread-safe: can be called from background tasks.
+        /// </summary>
+        /// <param name="category">The source or type of the message (e.g., SYSTEM, NETWORK).</param>
+        /// <param name="message">The actual information to log.</param>
+        public static void Log(string category, string message)
+        {
+            _instance?.Dispatcher.Invoke(() =>
+            {
+                if (_instance.StatusLog != null)
+                {
+                    string timestamp = DateTime.Now.ToString("HH:mm:ss");
+                    _instance.StatusLog.Text += $"\n[{timestamp}] [{category.ToUpper()}] {message}";
+
+                    // Automatically scroll to the latest log entry
+                    _instance.LogScrollViewer?.ScrollToEnd();
+                }
             });
         }
 
-        private void NavOptimize_Click(object sender, RoutedEventArgs e) => MainFrame.Content = new OptimizeView();
-        private void NavConfig_Click(object sender, RoutedEventArgs e) => MainFrame.Content = new ConfigView();
-        private void NavInstall_Click(object sender, RoutedEventArgs e) => MainFrame.Content = new InstallView();
-        private void Exit_Click(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+        // ============================================================
+        // NAVIGATION HANDLERS
+        // ============================================================
+
+        private void NavInstall_Click(object sender, RoutedEventArgs e)
+        {
+            ViewContainer.Content = new InstallView();
+            Log("NAV", "Switched to App Installer");
+        }
+
+        private void NavOptimize_Click(object sender, RoutedEventArgs e)
+        {
+            ViewContainer.Content = new OptimizeView();
+            Log("NAV", "Switched to System Optimization");
+        }
+
+        private void NavConfig_Click(object sender, RoutedEventArgs e)
+        {
+            ViewContainer.Content = new ConfigView();
+            Log("NAV", "Switched to Additional Configuration");
+        }
     }
 }

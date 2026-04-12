@@ -1,38 +1,70 @@
 ﻿<Window x:Class="ErzaWinUtility.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Erza Win Utility" Height="700" Width="1000"
-        Background="#12121B" WindowStyle="None" AllowsTransparency="True" WindowStartupLocation="CenterScreen">
+        Title="Erza Win Utility" Height="650" Width="1000"
+        Background="Transparent" AllowsTransparency="True" WindowStyle="None"
+        WindowStartupLocation="CenterScreen">
 
-    <Border CornerRadius="15" Background="#12121B" BorderThickness="1" BorderBrush="#2A2A38">
+    <Border Background="{StaticResource BgMain}" 
+            CornerRadius="15" 
+            BorderBrush="{StaticResource BorderCol}" 
+            BorderThickness="1">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="220"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Background="#181824">
-                <TextBlock Text="ERZA UTILITY" Foreground="#4A7FD4" FontSize="22" FontWeight="Bold" Margin="25,30,0,40"/>
+            <Border Grid.Column="0" Background="{StaticResource BgPanel}" CornerRadius="15,0,0,15">
+                <StackPanel Margin="10,20">
+                    <TextBlock Text="ERZA UTILITY" 
+                               Foreground="{StaticResource AccentBlue}" 
+                               FontSize="20" 
+                               FontWeight="Bold" 
+                               HorizontalAlignment="Center" 
+                               Margin="0,0,0,30"/>
 
-                <RadioButton Content="Optimization" Style="{StaticResource MenuButtonStyle}" IsChecked="True" Click="NavOptimize_Click"/>
-                <RadioButton Content="Configuration" Style="{StaticResource MenuButtonStyle}" Click="NavConfig_Click"/>
-                <RadioButton Content="App Installer" Style="{StaticResource MenuButtonStyle}" Click="NavInstall_Click"/>
+                    <RadioButton Content="App Installer"
+                                 Style="{StaticResource NavButtonStyle}"
+                                 Click="NavInstall_Click"/>
 
-                <Button Content="Exit" Click="Exit_Click" Margin="20,100,20,0" Height="35" Style="{StaticResource PrimaryButton}" Background="#3D2A2A"/>
-            </StackPanel>
+                    <RadioButton Content="System Optimization"
+                                 Style="{StaticResource NavButtonStyle}"
+                                 IsChecked="True"
+                                 Click="NavOptimize_Click"/>
+
+                    <RadioButton Content="Additional Config"
+                                 Style="{StaticResource NavButtonStyle}"
+                                 Click="NavConfig_Click"/>
+                </StackPanel>
+            </Border>
 
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="180"/>
+                    <RowDefinition Height="120"/>
                 </Grid.RowDefinitions>
 
-                <ContentControl x:Name="MainFrame" Margin="20"/>
+                <Grid x:Name="TitleBar" Grid.Row="0" Background="Transparent">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="BtnMinimize" Content="_" Width="40" Background="Transparent" Foreground="White" BorderThickness="0"/>
+                        <Button x:Name="BtnClose" Content="X" Width="40" Background="Transparent" Foreground="White" BorderThickness="0"/>
+                    </StackPanel>
+                </Grid>
 
-                <Border Grid.Row="1" Background="#0C0C12" BorderThickness="0,1,0,0" BorderBrush="#2A2A38">
-                    <TextBox x:Name="LogTerminal" Background="Transparent" Foreground="#A0A0B8" 
-                             BorderThickness="0" IsReadOnly="True" Margin="10" VerticalScrollBarVisibility="Auto"
-                             FontFamily="Consolas" TextWrapping="Wrap"/>
+                <ContentControl x:Name="ViewContainer" Grid.Row="1" Margin="20"/>
+
+                <Border Grid.Row="2" Background="#0A0A0F" CornerRadius="10" Margin="20,10,20,20" BorderBrush="#20202A" BorderThickness="1">
+                    <ScrollViewer x:Name="LogScrollViewer">
+                        <TextBlock x:Name="StatusLog" 
+                                   Text="> System Ready..." 
+                                   Foreground="#4A7FD4" 
+                                   FontFamily="Consolas" 
+                                   FontSize="11" 
+                                   Margin="12" 
+                                   TextWrapping="Wrap"/>
+                    </ScrollViewer>
                 </Border>
             </Grid>
         </Grid>
