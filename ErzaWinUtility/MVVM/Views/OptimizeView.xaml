@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="500" d:DesignWidth="750">
+             d:DesignHeight="1200" d:DesignWidth="750">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
@@ -37,25 +37,64 @@
                 </Grid>
             </Border>
 
-            <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20">
+            <Border Background="#1A1111" CornerRadius="12" BorderBrush="#FF4C4C" BorderThickness="1" Padding="20" Margin="0,0,0,15">
                 <StackPanel>
-                    <TextBlock Text="System Tweaks" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                    <TextBlock Text="Safety Configuration" Foreground="#FF4C4C" FontSize="18" FontWeight="Bold"/>
+                    <TextBlock Text="Modifying system settings can be risky. We strongly recommend creating a restore point first." 
+                               Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,5,0,15"/>
+                    <Grid>
+                        <Button x:Name="BtnCreateRestore" Content="Create Restore Point" HorizontalAlignment="Left" 
+                                Width="180" Height="35" Background="#33FF4C4C" Foreground="White" BorderBrush="#FF4C4C"
+                                Click="BtnCreateRestore_Click"/>
 
-                    <Grid Margin="0,8">
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Disable Telemetry" Foreground="{StaticResource TextPrimary}" FontSize="14"/>
-                            <TextBlock Text="Disables Windows data collection and tracking services." 
-                                       Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                        <CheckBox x:Name="CheckSafetyLock" Content="I have created a restore point and I know what I'm doing" 
+                                  Foreground="White" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                  Checked="CheckSafetyLock_Changed" Unchecked="CheckSafetyLock_Changed"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="TweaksContainer" Background="{StaticResource BgPanel}" CornerRadius="12" 
+                    BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Opacity="0.3" IsEnabled="False">
+                <StackPanel>
+                    <Grid Margin="0,0,0,15">
+                        <TextBlock Text="System Tweaks" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Recommended" Click="BtnProfileRecommended_Click" Style="{StaticResource ActionButtonStyle}" Width="110" Margin="5,0"/>
+                            <Button Content="Select All" Click="BtnProfileAll_Click" Style="{StaticResource ActionButtonStyle}" Width="90" Margin="5,0"/>
+                            <Button Content="Clear All" Click="BtnProfileClear_Click" Style="{StaticResource ActionButtonStyle}" Width="90" Margin="5,0"/>
                         </StackPanel>
-                        <CheckBox x:Name="TelemetryToggle" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                  Style="{StaticResource ModernToggleStyle}"
-                                  Click="TelemetryToggle_Click"/>
                     </Grid>
 
-                    <Separator Background="#1A1A25" Margin="0,10"/>
+                    <StackPanel x:Name="TweaksList">
+                        <CheckBox x:Name="TweakTempFiles" Content="Delete Temporary Files" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakActivityHistory" Content="Disable Activity History" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakConsumerFeatures" Content="Disable Consumer Features" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakFolderDiscovery" Content="Disable Automatic Folder Discovery" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakLocation" Content="Disable Location Tracking" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakTelemetry" Content="Disable System Telemetry" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakWPBT" Content="Disable WPBT (Bios Bloatware)" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakEndTask" Content="Enable Taskbar End Task" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakWidgets" Content="Remove Windows Widgets" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakDiskCleanup" Content="Run Disk Cleanup" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakServices" Content="Set Services to Manual" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakCopilot" Content="Disable Microsoft Copilot" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakEdge" Content="Edge Browser Debloat" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakOneDrive" Content="Remove OneDrive" Foreground="White" Margin="0,8" />
+                        <CheckBox x:Name="TweakClassicMenu" Content="Set Classic Right-Click Menu" Foreground="White" Margin="0,8" />
+                    </StackPanel>
 
-                    <TextBlock Text="[ Additional tweaks can be registered here ]" 
-                               Foreground="#333344" FontSize="11" HorizontalAlignment="Center" Margin="0,10"/>
+                    <Button x:Name="BtnRunTweaks" Content="Run Selected Tweaks" Margin="0,20,0,0" 
+                            Background="{StaticResource AccentBlue}" Foreground="White" FontWeight="Bold" Height="45"
+                            Cursor="Hand" Click="BtnRunTweaks_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                 </StackPanel>
             </Border>
         </StackPanel>

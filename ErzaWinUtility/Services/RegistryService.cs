@@ -1,15 +1,17 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace ErzaWinUtility.Services
 {
     /// <summary>
-    /// Core service for managing Windows Registry modifications and system-level tweaks.
-    /// Provides methods to toggle security features, system UI elements, and performance optimizations.
+    /// Service responsible for system-level modifications via Windows Registry and Shell commands.
+    /// All methods assume Administrative privileges via app.manifest.
     /// </summary>
     public static class RegistryService
     {
+        // Registry Paths
         private const string CrashControlPath = @"System\CurrentControlSet\Control\CrashControl";
         private const string HibernatePath = @"System\CurrentControlSet\Control\Power";
         private const string SystemRestorePath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore";
@@ -21,149 +23,164 @@ namespace ErzaWinUtility.Services
         // SECURITY & SYSTEM
         // ============================================================
 
+        public static bool IsDetailedBsodEnabled() => GetDword(Registry.LocalMachine, CrashControlPath, "DisplayParameters") == 1;
+        public static void SetDetailedBsod(bool enable) => SetDword(Registry.LocalMachine, CrashControlPath, "DisplayParameters", enable ? 1 : 0);
+
+        public static bool IsHibernationEnabled() => GetDword(Registry.LocalMachine, HibernatePath, "HibernateEnabled") == 1;
+        public static void SetHibernation(bool enable) => RunProcess("powercfg.exe", enable ? "/hibernate on" : "/hibernate off");
+
+        public static bool IsSystemProtectionEnabled() => Registry.LocalMachine.OpenSubKey(SystemRestorePath)?.GetValue("RPSessionInterval") != null;
+        public static void SetSystemProtection(bool enable) => RunPowerShell(enable ? "Enable-ComputerRestore -Drive 'C:\\'" : "Disable-ComputerRestore -Drive 'C:\\'");
+
+        public static bool IsCoreIsolationEnabled() => GetDword(Registry.LocalMachine, CoreIsolationPath, "Enabled") == 1;
+        public static void SetCoreIsolation(bool enable) => SetDword(Registry.LocalMachine, CoreIsolationPath, "Enabled", enable ? 1 : 0);
+
+        // ============================================================
+        // OPTIMIZATION ENGINE (OptimizeView)
+        // ============================================================
+
         /// <summary>
-        /// Checks if the Blue Screen of Death (BSoD) is configured to show technical details.
+        /// Creates a Windows System Restore Point.
         /// </summary>
-        public static bool IsDetailedBsodEnabled()
+        public static void CreateRestorePoint(string description)
         {
-            try { using (var key = Registry.LocalMachine.OpenSubKey(CrashControlPath)) return (int)(key?.GetValue("DisplayParameters", 0) ?? 0) == 1; } catch { return false; }
+            // We use environment variable to handle spaces in description safely
+            Environment.SetEnvironmentVariable("RESTORE_DESC", description);
+
+            string script = "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore' -Name 'SystemRestorePointCreationFrequency' -Value 0 -Force; " +
+                            "Checkpoint-Computer -Description $env:RESTORE_DESC -RestorePointType MODIFY_SETTINGS -ErrorAction SilentlyContinue";
+
+            RunPowerShellSync(script);
         }
 
         /// <summary>
-        /// Configures the system to show detailed technical information on a crash (BSoD).
+        /// Cleans temporary files from User and System directories.
         /// </summary>
-        public static void SetDetailedBsod(bool enable)
-        {
-            try { using (var key = Registry.LocalMachine.OpenSubKey(CrashControlPath, true)) key?.SetValue("DisplayParameters", enable ? 1 : 0, RegistryValueKind.DWord); } catch { }
-        }
+        public static void CleanupTempFiles() => RunPowerShell("Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path C:\\Windows\\Temp\\* -Recurse -Force -ErrorAction SilentlyContinue");
 
         /// <summary>
-        /// Checks if system hibernation is currently enabled in the registry.
+        /// Launches the native Disk Cleanup tool for Drive C.
         /// </summary>
-        public static bool IsHibernationEnabled()
-        {
-            try { using (var key = Registry.LocalMachine.OpenSubKey(HibernatePath)) return (int)(key?.GetValue("HibernateEnabled", 0) ?? 0) == 1; } catch { return false; }
-        }
-
-        /// <summary>
-        /// Toggles system hibernation state using the powercfg utility.
-        /// </summary>
-        public static void SetHibernation(bool enable)
-        {
-            try { Process.Start(new ProcessStartInfo("powercfg", enable ? "-h on" : "-h off") { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true, Verb = "runas" }); } catch { }
-        }
-
-        /// <summary>
-        /// Verifies if System Protection (Restore Points) is enabled for the primary drive.
-        /// </summary>
-        public static bool IsSystemProtectionEnabled()
-        {
-            try { using (var key = Registry.LocalMachine.OpenSubKey(SystemRestorePath)) return key?.GetValue("RPSessionInterval") != null; } catch { return false; }
-        }
-
-        /// <summary>
-        /// Enables or disables System Protection via PowerShell commands.
-        /// </summary>
-        public static void SetSystemProtection(bool enable)
-        {
-            try { Process.Start(new ProcessStartInfo("powershell.exe", $"-Command \"{(enable ? "Enable" : "Disable")}-ComputerRestore -Drive 'C:\\'\"") { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true, Verb = "runas" }); } catch { }
-        }
-
-        /// <summary>
-        /// Checks if Core Isolation (Memory Integrity) is enabled in the registry.
-        /// </summary>
-        public static bool IsCoreIsolationEnabled()
-        {
-            try { using (var key = Registry.LocalMachine.OpenSubKey(CoreIsolationPath)) return (int)(key?.GetValue("Enabled", 0) ?? 0) == 1; } catch { return false; }
-        }
-
-        /// <summary>
-        /// Toggles Core Isolation (VBS) state. Note: Requires a system reboot to apply.
-        /// </summary>
-        public static void SetCoreIsolation(bool enable)
+        public static void RunExtendedDiskCleanup()
         {
             try
             {
-                using (RegistryKey key = Registry.LocalMachine.CreateSubKey(CoreIsolationPath))
-                {
-                    key.SetValue("Enabled", enable ? 1 : 0, RegistryValueKind.DWord);
-                }
+                Process.Start(new ProcessStartInfo("cleanmgr.exe", "/d C") { UseShellExecute = true });
             }
             catch { }
         }
 
-        // ============================================================
-        // OPTIMIZATION (TELEMETRY)
-        // ============================================================
-
         /// <summary>
-        /// Disables Windows Data Collection (Telemetry) and stops related background services.
+        /// Placeholder for OneDrive removal. Feature pending fix.
         /// </summary>
-        public static void SetTelemetry(bool disable)
+        public static void RemoveOneDrive()
         {
+            MainWindow.Log("WARNING", "OneDrive removal is currently a PLACEHOLDER. Feature pending fix.");
             try
             {
-                using (RegistryKey key = Registry.LocalMachine.CreateSubKey(TelemetryPath))
-                {
-                    // 0 = Security (Minimal data), 3 = Full (Default)
-                    key.SetValue("AllowTelemetry", disable ? 0 : 3, RegistryValueKind.DWord);
-                }
-
-                // Manage the 'Connected User Experiences and Telemetry' service (DiagTrack)
-                string cmd = disable ? "stop-service DiagTrack; set-service DiagTrack -startupType Disabled"
-                                     : "set-service DiagTrack -startupType Automatic; start-service DiagTrack";
-
-                Process.Start(new ProcessStartInfo("powershell.exe", $"-Command \"{cmd}\"") { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true, Verb = "runas" });
+                Process.Start(new ProcessStartInfo("cmd.exe", "/c echo OneDrive removal triggered (Simulation)") { CreateNoWindow = true });
             }
             catch { }
         }
 
+        /// <summary>
+        /// Restores the classic Windows 10 style context menu on Windows 11.
+        /// </summary>
+        public static void SetClassicContextMenu(bool enable)
+        {
+            try
+            {
+                string keyPath = @"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32";
+                if (enable)
+                {
+                    using (var key = Registry.CurrentUser.CreateSubKey(keyPath)) key.SetValue("", "");
+                }
+                else
+                {
+                    Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}", false);
+                }
+                RestartExplorer();
+            }
+            catch { }
+        }
+
+        // --- System Tweaks Implementation ---
+        public static void SetActivityHistory(bool enable) => SetDword(Registry.LocalMachine, @"SOFTWARE\Policies\Microsoft\Windows\System", "PublishUserActivities", enable ? 1 : 0);
+        public static void SetConsumerFeatures(bool enable) => SetDword(Registry.LocalMachine, @"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableWindowsConsumerFeatures", enable ? 0 : 1);
+        public static void SetLocationTracking(bool enable) => RunPowerShell($"Set-Service -Name lfsvc -StartupType {(enable ? "Automatic" : "Disabled")}");
+        public static void DisableWPBT() => SetDword(Registry.LocalMachine, @"SYSTEM\CurrentControlSet\Control\Session Manager", "DisableWPBT", 1);
+        public static void EnableEndTask() => SetString(Registry.CurrentUser, @"Control Panel\Desktop", "EndTaskThreshold", "5000");
+        public static void RemoveWidgets() => RunPowerShell("Get-AppxPackage -allusers *WebExperience* | Remove-AppxPackage -AllUsers");
+        public static void OptimizeServices() => RunPowerShell("Set-Service -Name SysMain -StartupType Disabled");
+        public static void SetCopilot(bool enable) => SetDword(Registry.CurrentUser, @"Software\Policies\Microsoft\Windows\WindowsCopilot", "TurnOffWindowsCopilot", enable ? 0 : 1);
+        public static void DebloatEdge() => SetDword(Registry.LocalMachine, @"SOFTWARE\Policies\Microsoft\Edge", "HubsSidebarEnabled", 0);
+        public static void SetTelemetry(bool disable) => SetDword(Registry.LocalMachine, TelemetryPath, "AllowTelemetry", disable ? 0 : 3);
+
         // ============================================================
-        // INTERFACE TWEAKS
+        // INTERFACE TWEAKS (ConfigView)
         // ============================================================
 
-        /// <summary>
-        /// Checks if the system clock taskbar is configured to show seconds.
-        /// </summary>
-        public static bool IsSecondsInClockEnabled()
-        {
-            try { using (var key = Registry.CurrentUser.OpenSubKey(ExplorerAdvancedPath)) return (int)(key?.GetValue("ShowSecondsInSystemClock", 0) ?? 0) == 1; } catch { return false; }
-        }
+        public static bool IsSecondsInClockEnabled() => GetDword(Registry.CurrentUser, ExplorerAdvancedPath, "ShowSecondsInSystemClock") == 1;
+        public static void SetSecondsInClock(bool enable) => SetDword(Registry.CurrentUser, ExplorerAdvancedPath, "ShowSecondsInSystemClock", enable ? 1 : 0);
 
-        /// <summary>
-        /// Toggles the visibility of seconds in the system taskbar clock.
-        /// </summary>
-        public static void SetSecondsInClock(bool enable)
-        {
-            try { using (var key = Registry.CurrentUser.OpenSubKey(ExplorerAdvancedPath, true)) key?.SetValue("ShowSecondsInSystemClock", enable ? 1 : 0, RegistryValueKind.DWord); } catch { }
-        }
-
-        /// <summary>
-        /// Verifies if hidden files and folders are currently set to be visible in Explorer.
-        /// </summary>
-        public static bool IsHiddenFilesVisible()
-        {
-            try { using (var key = Registry.CurrentUser.OpenSubKey(ExplorerAdvancedPath)) return (int)(key?.GetValue("Hidden", 2) ?? 2) == 1; } catch { return false; }
-        }
-
-        /// <summary>
-        /// Toggles the visibility of hidden files, system files, and extensions, then refreshes all Explorer windows.
-        /// </summary>
+        public static bool IsHiddenFilesVisible() => GetDword(Registry.CurrentUser, ExplorerAdvancedPath, "Hidden") == 1;
         public static void SetHiddenFilesVisibility(bool visible)
         {
             try
             {
                 using (var key = Registry.CurrentUser.OpenSubKey(ExplorerAdvancedPath, true))
                 {
-                    if (key == null) return;
-                    key.SetValue("Hidden", visible ? 1 : 2, RegistryValueKind.DWord);
-                    key.SetValue("HideFileExt", visible ? 0 : 1, RegistryValueKind.DWord);
-                    key.SetValue("ShowSuperHidden", visible ? 1 : 2, RegistryValueKind.DWord);
+                    key?.SetValue("Hidden", visible ? 1 : 2);
+                    key?.SetValue("HideFileExt", visible ? 0 : 1);
+                    key?.SetValue("ShowSuperHidden", visible ? 1 : 2);
                 }
-                // Refresh shell windows to apply changes immediately
-                Process.Start(new ProcessStartInfo("powershell.exe", "-Command \"$s=New-Object -ComObject Shell.Application;$s.Windows() | %{ $_.Refresh() }\"") { WindowStyle = ProcessWindowStyle.Hidden, CreateNoWindow = true });
+                RunPowerShell("$s=New-Object -ComObject Shell.Application;$s.Windows() | %{ $_.Refresh() }");
             }
             catch { }
         }
+
+        // ============================================================
+        // HELPERS
+        // ============================================================
+
+        private static void RestartExplorer()
+        {
+            try
+            {
+                Process.Start("taskkill", "/f /im explorer.exe")?.WaitForExit();
+                Process.Start("explorer.exe");
+            }
+            catch { }
+        }
+
+        private static void RunPowerShell(string cmd) => RunProcess("powershell.exe", $"-NoProfile -ExecutionPolicy Bypass -Command \"{cmd}\"");
+
+        private static void RunPowerShellSync(string cmd)
+        {
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo("powershell.exe", $"-NoProfile -ExecutionPolicy Bypass -Command \"{cmd}\"")
+                {
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                };
+                using (Process p = Process.Start(psi)) { p?.WaitForExit(); }
+            }
+            catch { }
+        }
+
+        private static void RunProcess(string file, string args)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(file, args) { CreateNoWindow = true, UseShellExecute = false });
+            }
+            catch { }
+        }
+
+        private static int GetDword(RegistryKey root, string path, string name) { try { return (int)(root.OpenSubKey(path)?.GetValue(name, 0) ?? 0); } catch { return 0; } }
+        private static void SetDword(RegistryKey root, string path, string name, int value) { try { root.CreateSubKey(path).SetValue(name, value, RegistryValueKind.DWord); } catch { } }
+        private static void SetString(RegistryKey root, string path, string name, string value) { try { root.CreateSubKey(path).SetValue(name, value, RegistryValueKind.String); } catch { } }
     }
 }
