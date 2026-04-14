@@ -8,8 +8,8 @@ using ErzaWinUtility.Services;
 namespace ErzaWinUtility.MVVM.Views
 {
     /// <summary>
-    /// Interaction logic for InstallView.xaml.
-    /// Manages bulk application installation using the Winget package manager.
+    /// Logic for automated software installation using Winget.
+    /// Maps UI CheckBoxes to official Winget Package IDs.
     /// </summary>
     public partial class InstallView : UserControl
     {
@@ -18,68 +18,106 @@ namespace ErzaWinUtility.MVVM.Views
             InitializeComponent();
         }
 
-        /// <summary>
-        /// Collects all selected applications and initiates the asynchronous installation process.
-        /// </summary>
         private async void BtnInstall_Click(object sender, RoutedEventArgs e)
         {
-            // Disable button to prevent multiple concurrent installation sessions
             BtnInstall.IsEnabled = false;
-            MainWindow.Log("INSTALL", "Starting automated installation process...");
+            MainWindow.Log("INSTALLER", "Preparing installation queue...");
 
-            // Map UI CheckBoxes to their respective Winget IDs
+            // Comprehensive mapping of UI CheckBoxes to Winget IDs
             var appMappings = new Dictionary<CheckBox, string>
             {
-                { ChromeCheck, "Google.Chrome" },
+                // Browsers
                 { BraveCheck, "Brave.Brave" },
+                { ChromeCheck, "Google.Chrome" },
                 { FirefoxCheck, "Mozilla.Firefox" },
-                { OperaCheck, "Opera.OperaGX" },
+                { EdgeCheck, "Microsoft.Edge" },
+
+                // Communication
+                { DiscordCheck, "Discord.Discord" },
+                { TeamSpeakCheck, "TeamSpeakSystems.TeamSpeak" },
+                { MumbleCheck, "Mumble.Mumble" },
+                { TeamsCheck, "Microsoft.Teams" },
+                { SlackCheck, "SlackTechnologies.Slack" },
+
+                // Gaming Launchers
+                { PlayniteCheck, "Playnite.Playnite" },
+                { SteamCheck, "Valve.Steam" },
+                { EpicCheck, "EpicGames.EpicGamesLauncher" },
+                { UbisoftCheck, "Ubisoft.Connect" },
+                { GogCheck, "GOG.Galaxy" },
+                { EaCheck, "ElectronicArts.EADesktop" },
+                { BattleNetCheck, "Blizzard.BattleNet" },
+
+                // Multimedia
+                { SpotifyCheck, "9P6527LD0L4L" },
+                { TidalCheck, "TIDAL.TIDAL" },
+                { VlcCheck, "VideoLAN.VLC" },
+                { KliteCheck, "CodecGuide.K-LiteCodecPack.Full" },
+
+                // Content Creation
+                { ObsCheck, "OBSProject.OBSStudio" },
+                { StreamlabsCheck, "Streamlabs.StreamlabsDesktop" },
+                { MeldCheck, "MeldStudio.MeldStudio" },
+                { MedalCheck, "Medal.Medal" },
+
+                // Development Tools
                 { VsCodeCheck, "Microsoft.VisualStudioCode" },
-                { GitCheck, "Git.Git" },
+                { NotepadCheck, "Notepad++.Notepad++" },
+                { ArduinoCheck, "Arduino.IDE.2" },
+
+                // Microsoft
+                { CopilotCheck, "Microsoft.Copilot" },
+                { MsStoreCheck, "Microsoft.WindowsStore" },
+                { XboxCheck, "Microsoft.XboxApp" },
+
+                // System Tools
+                { WinrarCheck, "RARLab.WinRAR" },
                 { SevenZipCheck, "7zip.7zip" },
-                { DiscordCheck, "Discord.Discord" }
+                { SignalRgbCheck, "WhirlwindFX.SignalRGB" },
+
+                // Monitoring & Benchmarks
+                { HwinfoCheck, "REALiX.HWiNFO" },
+                { HwmonitorCheck, "CPUID.HWMonitor" },
+                { CpuzCheck, "CPUID.CPU-Z" },
+                { GpuzCheck, "TechPowerUp.GPU-Z" },
+                { AfterburnerCheck, "MSI.Afterburner" },
+                { FurmarkCheck, "Geeks3D.FurMark" },
+                { CapframexCheck, "CapFrameX.CapFrameX" }
             };
 
-            List<Task> installationTasks = new List<Task>();
-
+            int selectedCount = 0;
             foreach (var app in appMappings)
             {
-                if (app.Key.IsChecked == true)
+                // Verification if the checkbox exists (failsafe) and is checked
+                if (app.Key != null && app.Key.IsChecked == true)
                 {
-                    MainWindow.Log("WINGET", $"Queuing installation for: {app.Value}");
-                    // We call the asynchronous service method to handle the process
-                    installationTasks.Add(HandleInstallation(app.Value));
+                    selectedCount++;
+                    string appName = app.Key.Content.ToString() ?? app.Value;
+
+                    MainWindow.Log("WINGET", $"Installing {appName}...");
+
+                    try
+                    {
+                        await WingetService.InstallAppAsync(app.Value);
+                        MainWindow.Log("SUCCESS", $"{appName} installed successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        MainWindow.Log("ERROR", $"Failed to install {appName}: {ex.Message}");
+                    }
                 }
             }
 
-            if (installationTasks.Count > 0)
-            {
-                await Task.WhenAll(installationTasks);
-                MainWindow.Log("INSTALL", "All selected applications have been processed.");
-            }
-            else
+            if (selectedCount == 0)
             {
                 MainWindow.Log("WARNING", "No applications selected for installation.");
             }
+            else
+            {
+                MainWindow.Log("INSTALLER", $"Process finished. {selectedCount} apps processed.");
+            }
 
             BtnInstall.IsEnabled = true;
-        }
-
-        /// <summary>
-        /// Wrapper to handle individual application installation and logging.
-        /// </summary>
-        /// <param name="appId">The Winget ID of the application.</param>
-        private async Task HandleInstallation(string appId)
-        {
-            try
-            {
-                await WingetService.InstallAppAsync(appId); //
-                MainWindow.Log("SUCCESS", $"Finished processing {appId}");
-            }
-            catch (Exception ex)
-            {
-                MainWindow.Log("ERROR", $"Failed to install {appId}: {ex.Message}");
-            }
         }
     }
 }

@@ -7,10 +7,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>erzawinutility.ico</ApplicationIcon>
+    <Version>1.0.7</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\Erza_PowerPlan.pow" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="erzawinutility.ico" />
   </ItemGroup>
 
   <ItemGroup>
