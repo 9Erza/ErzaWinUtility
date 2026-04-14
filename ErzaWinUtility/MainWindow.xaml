@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Erza Win Utility" Height="650" Width="1000"
         Background="Transparent" AllowsTransparency="True" WindowStyle="None"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen" MouseDown="Window_MouseDown">
 
     <Border Background="{StaticResource BgMain}" 
             CornerRadius="15" 
@@ -15,7 +15,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="{StaticResource BgPanel}" CornerRadius="15,0,0,15">
+            <Border Grid.Column="0" Background="{StaticResource BgPanel}" CornerRadius="14,0,0,14">
                 <StackPanel Margin="10,20">
                     <TextBlock Text="ERZA UTILITY" 
                                Foreground="{StaticResource AccentBlue}" 
@@ -36,6 +36,10 @@
                     <RadioButton Content="Additional Config"
                                  Style="{StaticResource NavButtonStyle}"
                                  Click="NavConfig_Click"/>
+
+                    <RadioButton Content="System Updates"
+                                 Style="{StaticResource NavButtonStyle}"
+                                 Click="NavUpdates_Click"/>
                 </StackPanel>
             </Border>
 
@@ -43,23 +47,23 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="32"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="120"/>
+                    <RowDefinition Height="130"/>
                 </Grid.RowDefinitions>
 
                 <Grid x:Name="TitleBar" Grid.Row="0" Background="Transparent">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="BtnMinimize" Content="_" Width="40" Background="Transparent" Foreground="White" BorderThickness="0"/>
-                        <Button x:Name="BtnClose" Content="X" Width="40" Background="Transparent" Foreground="White" BorderThickness="0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,5,0">
+                        <Button x:Name="BtnMinimize" Content="−" Width="40" Background="Transparent" Foreground="White" BorderThickness="0" Click="BtnMinimize_Click"/>
+                        <Button x:Name="BtnClose" Content="✕" Width="40" Background="Transparent" Foreground="White" BorderThickness="0" Click="BtnClose_Click"/>
                     </StackPanel>
                 </Grid>
 
-                <ContentControl x:Name="ViewContainer" Grid.Row="1" Margin="20"/>
+                <ContentControl x:Name="ViewContainer" Grid.Row="1" Margin="20,10,20,10"/>
 
                 <Border Grid.Row="2" Background="#0A0A0F" CornerRadius="10" Margin="20,10,20,20" BorderBrush="#20202A" BorderThickness="1">
-                    <ScrollViewer x:Name="LogScrollViewer">
+                    <ScrollViewer x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto">
                         <TextBlock x:Name="StatusLog" 
                                    Text="> System Ready..." 
-                                   Foreground="#4A7FD4" 
+                                   Foreground="{StaticResource AccentBlue}" 
                                    FontFamily="Consolas" 
                                    FontSize="11" 
                                    Margin="12" 

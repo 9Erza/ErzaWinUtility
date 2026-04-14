@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Versioning;
 
 namespace ErzaWinUtility.Services
 {
@@ -8,10 +9,15 @@ namespace ErzaWinUtility.Services
     /// Service responsible for managing Windows Power Plans.
     /// Handles importing, activating, and configuring custom power profiles via powercfg.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public static class PowerService
     {
         // Unique identifier for the custom power profile to ensure consistent targeting.
         private const string PlanGuid = "81b11e0c-c34c-4a2e-85ab-c5be4cd02b28";
+
+        // ============================================================
+        // PLAN DEPLOYMENT
+        // ============================================================
 
         /// <summary>
         /// Imports a binary power plan file, registers it with a unique GUID, and sets it as the active plan.
@@ -40,11 +46,15 @@ namespace ErzaWinUtility.Services
             }
             catch (Exception ex)
             {
-                // Log failure to the main window if something goes wrong during the file operations or process execution.
+                // Log failure to the main window for diagnostic visibility.
                 MainWindow.Log("ERROR", $"Power Plan deployment failed: {ex.Message}");
                 return false;
             }
         }
+
+        // ============================================================
+        // PRIVATE HELPERS
+        // ============================================================
 
         /// <summary>
         /// Executes a powercfg command with elevated privileges.
@@ -60,11 +70,14 @@ namespace ErzaWinUtility.Services
                     Arguments = args,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     CreateNoWindow = true,
-                    UseShellExecute = true, // Required for the 'runas' verb to trigger UAC if necessary.
-                    Verb = "runas"          // Requests administrative privileges for system power modification.
+                    UseShellExecute = true, // Required for 'runas' verb
+                    Verb = "runas"          // Request administrative elevation for power modification
                 };
 
-                Process.Start(psi)?.WaitForExit();
+                using (Process? p = Process.Start(psi))
+                {
+                    p?.WaitForExit();
+                }
             }
             catch (Exception ex)
             {

@@ -2,16 +2,21 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Versioning;
 
 namespace ErzaWinUtility.Services
 {
     /// <summary>
-    /// Service responsible for system-level modifications via Windows Registry and Shell commands.
-    /// All methods assume Administrative privileges via app.manifest.
+    /// Core service responsible for system-level modifications via Windows Registry and Shell commands.
+    /// All methods require Administrative privileges.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public static class RegistryService
     {
-        // Registry Paths
+        // ============================================================
+        // REGISTRY PATHS
+        // ============================================================
+
         private const string CrashControlPath = @"System\CurrentControlSet\Control\CrashControl";
         private const string HibernatePath = @"System\CurrentControlSet\Control\Power";
         private const string SystemRestorePath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore";
@@ -20,7 +25,7 @@ namespace ErzaWinUtility.Services
         private const string TelemetryPath = @"SOFTWARE\Policies\Microsoft\Windows\DataCollection";
 
         // ============================================================
-        // SECURITY & SYSTEM
+        // SECURITY & SYSTEM (ConfigView)
         // ============================================================
 
         public static bool IsDetailedBsodEnabled() => GetDword(Registry.LocalMachine, CrashControlPath, "DisplayParameters") == 1;
@@ -29,7 +34,33 @@ namespace ErzaWinUtility.Services
         public static bool IsHibernationEnabled() => GetDword(Registry.LocalMachine, HibernatePath, "HibernateEnabled") == 1;
         public static void SetHibernation(bool enable) => RunProcess("powercfg.exe", enable ? "/hibernate on" : "/hibernate off");
 
-        public static bool IsSystemProtectionEnabled() => Registry.LocalMachine.OpenSubKey(SystemRestorePath)?.GetValue("RPSessionInterval") != null;
+        public static bool IsSystemProtectionEnabled()
+        {
+            try
+            {
+                string script = "(Get-ComputerRestorePoint -LastStatus) -ne $null; (Get-WmiObject -Namespace root\\default -Class SystemRestoreConfig).ScanForVolumes() | Where-Object { $_.Drive -eq 'C:\\' } | Select-Object -ExpandProperty Setting";
+
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -ExecutionPolicy Bypass -Command \"Get-WmiObject -Namespace root\\default -Class SystemRestoreConfig | Select-Object -ExpandProperty RPSessionInterval\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                };
+
+                using (Process p = Process.Start(psi))
+                {
+                    string output = p.StandardOutput.ReadToEnd();
+                    p.WaitForExit();
+                    return !string.IsNullOrWhiteSpace(output) && output.Trim() != "0";
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
         public static void SetSystemProtection(bool enable) => RunPowerShell(enable ? "Enable-ComputerRestore -Drive 'C:\\'" : "Disable-ComputerRestore -Drive 'C:\\'");
 
         public static bool IsCoreIsolationEnabled() => GetDword(Registry.LocalMachine, CoreIsolationPath, "Enabled") == 1;
@@ -40,11 +71,10 @@ namespace ErzaWinUtility.Services
         // ============================================================
 
         /// <summary>
-        /// Creates a Windows System Restore Point.
+        /// Creates a Windows System Restore Point using PowerShell.
         /// </summary>
         public static void CreateRestorePoint(string description)
         {
-            // We use environment variable to handle spaces in description safely
             Environment.SetEnvironmentVariable("RESTORE_DESC", description);
 
             string script = "Set-ItemProperty -Path 'HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SystemRestore' -Name 'SystemRestorePointCreationFrequency' -Value 0 -Force; " +
@@ -53,39 +83,14 @@ namespace ErzaWinUtility.Services
             RunPowerShellSync(script);
         }
 
-        /// <summary>
-        /// Cleans temporary files from User and System directories.
-        /// </summary>
         public static void CleanupTempFiles() => RunPowerShell("Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item -Path C:\\Windows\\Temp\\* -Recurse -Force -ErrorAction SilentlyContinue");
 
-        /// <summary>
-        /// Launches the native Disk Cleanup tool for Drive C.
-        /// </summary>
         public static void RunExtendedDiskCleanup()
         {
-            try
-            {
-                Process.Start(new ProcessStartInfo("cleanmgr.exe", "/d C") { UseShellExecute = true });
-            }
-            catch { }
+            try { Process.Start(new ProcessStartInfo("cleanmgr.exe", "/d C") { UseShellExecute = true }); }
+            catch { /* Log or handle error */ }
         }
 
-        /// <summary>
-        /// Placeholder for OneDrive removal. Feature pending fix.
-        /// </summary>
-        public static void RemoveOneDrive()
-        {
-            MainWindow.Log("WARNING", "OneDrive removal is currently a PLACEHOLDER. Feature pending fix.");
-            try
-            {
-                Process.Start(new ProcessStartInfo("cmd.exe", "/c echo OneDrive removal triggered (Simulation)") { CreateNoWindow = true });
-            }
-            catch { }
-        }
-
-        /// <summary>
-        /// Restores the classic Windows 10 style context menu on Windows 11.
-        /// </summary>
         public static void SetClassicContextMenu(bool enable)
         {
             try
@@ -104,7 +109,10 @@ namespace ErzaWinUtility.Services
             catch { }
         }
 
-        // --- System Tweaks Implementation ---
+        // ============================================================
+        // SYSTEM TWEAKS IMPLEMENTATION
+        // ============================================================
+
         public static void SetActivityHistory(bool enable) => SetDword(Registry.LocalMachine, @"SOFTWARE\Policies\Microsoft\Windows\System", "PublishUserActivities", enable ? 1 : 0);
         public static void SetConsumerFeatures(bool enable) => SetDword(Registry.LocalMachine, @"SOFTWARE\Policies\Microsoft\Windows\CloudContent", "DisableWindowsConsumerFeatures", enable ? 0 : 1);
         public static void SetLocationTracking(bool enable) => RunPowerShell($"Set-Service -Name lfsvc -StartupType {(enable ? "Automatic" : "Disabled")}");
@@ -116,8 +124,36 @@ namespace ErzaWinUtility.Services
         public static void DebloatEdge() => SetDword(Registry.LocalMachine, @"SOFTWARE\Policies\Microsoft\Edge", "HubsSidebarEnabled", 0);
         public static void SetTelemetry(bool disable) => SetDword(Registry.LocalMachine, TelemetryPath, "AllowTelemetry", disable ? 0 : 3);
 
+        public static void RemoveOneDrive()
+        {
+            MainWindow.Log("WARNING", "OneDrive removal triggered (Simulation/Placeholder).");
+            RunProcess("cmd.exe", "/c echo OneDrive removal triggered");
+        }
+
         // ============================================================
-        // INTERFACE TWEAKS (ConfigView)
+        // WINDOWS UPDATE MANAGEMENT (UpdatesView)
+        // ============================================================
+
+        public static void SetWindowsUpdateStatus(bool enable)
+        {
+            string state = enable ? "Automatic" : "Disabled";
+            string action = enable ? "Start-Service" : "Stop-Service";
+            string cmd = $"{action} wuauserv -Force; Set-Service wuauserv -StartupType {state}";
+            RunPowerShell(cmd);
+        }
+
+        public static void ResetWindowsUpdateComponents()
+        {
+            string script = @"
+                Stop-Service wuauserv, bits, cryptsvc -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path $env:windir\SoftwareDistribution -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path $env:windir\System32\catroot2 -Recurse -Force -ErrorAction SilentlyContinue
+                Start-Service wuauserv, bits, cryptsvc";
+            RunPowerShellSync(script);
+        }
+
+        // ============================================================
+        // INTERFACE TWEAKS
         // ============================================================
 
         public static bool IsSecondsInClockEnabled() => GetDword(Registry.CurrentUser, ExplorerAdvancedPath, "ShowSecondsInSystemClock") == 1;
@@ -140,7 +176,7 @@ namespace ErzaWinUtility.Services
         }
 
         // ============================================================
-        // HELPERS
+        // PRIVATE HELPERS
         // ============================================================
 
         private static void RestartExplorer()
@@ -165,17 +201,14 @@ namespace ErzaWinUtility.Services
                     UseShellExecute = false,
                     WindowStyle = ProcessWindowStyle.Hidden
                 };
-                using (Process p = Process.Start(psi)) { p?.WaitForExit(); }
+                using (Process? p = Process.Start(psi)) { p?.WaitForExit(); }
             }
             catch { }
         }
 
         private static void RunProcess(string file, string args)
         {
-            try
-            {
-                Process.Start(new ProcessStartInfo(file, args) { CreateNoWindow = true, UseShellExecute = false });
-            }
+            try { Process.Start(new ProcessStartInfo(file, args) { CreateNoWindow = true, UseShellExecute = false }); }
             catch { }
         }
 

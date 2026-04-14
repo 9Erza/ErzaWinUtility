@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.Versioning;
 
 namespace ErzaWinUtility.Services
 {
@@ -7,8 +8,13 @@ namespace ErzaWinUtility.Services
     /// Service responsible for managing network configurations.
     /// Primarily handles DNS server assignment and DNS cache flushing via PowerShell.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public static class NetworkService
     {
+        // ============================================================
+        // DNS CONFIGURATION
+        // ============================================================
+
         /// <summary>
         /// Updates the DNS server addresses for all active network adapters.
         /// </summary>
@@ -51,6 +57,10 @@ namespace ErzaWinUtility.Services
             }
         }
 
+        // ============================================================
+        // PRIVATE HELPERS
+        // ============================================================
+
         /// <summary>
         /// Helper method to execute PowerShell commands with elevated privileges.
         /// </summary>
@@ -65,11 +75,14 @@ namespace ErzaWinUtility.Services
                     Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{command}\"",
                     WindowStyle = ProcessWindowStyle.Hidden,
                     CreateNoWindow = true,
-                    UseShellExecute = true, // Required for 'runas' verb
-                    Verb = "runas"          // Request administrative elevation for network modifications
+                    UseShellExecute = true, // Required for 'runas' verb to trigger UAC if needed
+                    Verb = "runas"          // Request administrative elevation
                 };
 
-                Process.Start(psi);
+                using (Process? p = Process.Start(psi))
+                {
+                    // Optional: Wait for exit if synchronization is required in the future
+                }
             }
             catch (Exception ex)
             {

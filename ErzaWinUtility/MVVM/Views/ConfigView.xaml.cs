@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using ErzaWinUtility.Services;
@@ -14,7 +15,8 @@ namespace ErzaWinUtility.MVVM.Views
         public ConfigView()
         {
             InitializeComponent();
-            // Ensure the UI reflects the actual state of the operating system on load.
+
+            // Sync UI states with current Windows configuration on initialization
             SynchronizeViewWithSystem();
         }
 
@@ -34,9 +36,13 @@ namespace ErzaWinUtility.MVVM.Views
             }
             catch (Exception ex)
             {
-                MainWindow.Log("ERROR", $"Sync failed: {ex.Message}");
+                MainWindow.Log("ERROR", $"OS Sync failed: {ex.Message}");
             }
         }
+
+        // ============================================================
+        // SECURITY & SYSTEM EVENTS
+        // ============================================================
 
         private void BsodToggle_Click(object sender, RoutedEventArgs e)
         {
@@ -64,16 +70,22 @@ namespace ErzaWinUtility.MVVM.Views
             bool isEnabled = CoreIsolationToggle.IsChecked ?? false;
             RegistryService.SetCoreIsolation(isEnabled);
             MainWindow.Log("SECURITY", $"Core Isolation {(isEnabled ? "Enabled" : "Disabled")}");
-            MessageBox.Show("Core Isolation modified. A system restart is required for changes to take effect.", "Security Info", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            MessageBox.Show("Core Isolation modified. A system restart is required for changes to take effect.",
+                            "Security Info", MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
+        // ============================================================
+        // INTERFACE & MOUSE EVENTS
+        // ============================================================
 
         private void MouseSettings_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Launches the native Windows Mouse Properties dialog.
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = "main.cpl", UseShellExecute = true });
-                MainWindow.Log("SYSTEM", "Opened Mouse Properties");
+                // Launches the native Windows Mouse Properties dialog (main.cpl)
+                Process.Start(new ProcessStartInfo { FileName = "main.cpl", UseShellExecute = true });
+                MainWindow.Log("SYSTEM", "Opened Windows Mouse Properties.");
             }
             catch (Exception ex)
             {
@@ -92,12 +104,16 @@ namespace ErzaWinUtility.MVVM.Views
         {
             bool isEnabled = HiddenFilesToggle.IsChecked ?? false;
             RegistryService.SetHiddenFilesVisibility(isEnabled);
-            MainWindow.Log("UI", $"Hidden Files {(isEnabled ? "Visible" : "Hidden")}");
+            MainWindow.Log("UI", $"Hidden Files visibility updated.");
         }
+
+        // ============================================================
+        // NETWORK EVENTS
+        // ============================================================
 
         private void DnsSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // IsLoaded check prevents unnecessary logic execution during component initialization.
+            // IsLoaded check ensures logic runs only after UI is ready
             if (DnsSelector != null && DnsSelector.IsLoaded)
             {
                 if (DnsSelector.SelectedItem is ComboBoxItem item)

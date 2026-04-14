@@ -14,14 +14,15 @@
 
         <StackPanel Grid.Row="0" Margin="20,15,20,5">
             <TextBlock Text="App Installer" Foreground="White" FontSize="32" FontWeight="Bold"/>
-            <TextBlock Text="Automated software deployment via Windows Package Manager" Foreground="{StaticResource TextSecondary}" FontSize="12" Margin="0,5,0,20"/>
+            <TextBlock Text="Automated software deployment via Windows Package Manager" 
+                       Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,5,0,20"/>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="10,0">
             <StackPanel Margin="10">
 
-                <TextBlock Text="BROWSERS" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="BROWSERS" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="BraveCheck" Content="Brave" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="ChromeCheck" Content="Google Chrome" Foreground="White" Margin="5"/>
@@ -30,8 +31,8 @@
                     </UniformGrid>
                 </Border>
 
-                <TextBlock Text="COMMUNICATION" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="COMMUNICATION" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="DiscordCheck" Content="Discord" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="TeamSpeakCheck" Content="TeamSpeak" Foreground="White" Margin="5"/>
@@ -41,8 +42,8 @@
                     </UniformGrid>
                 </Border>
 
-                <TextBlock Text="GAMING LAUNCHERS" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="GAMING LAUNCHERS" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="PlayniteCheck" Content="Playnite" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="SteamCheck" Content="Steam" Foreground="White" Margin="5"/>
@@ -54,8 +55,8 @@
                     </UniformGrid>
                 </Border>
 
-                <TextBlock Text="MULTIMEDIA" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="MULTIMEDIA" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="SpotifyCheck" Content="Spotify" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="TidalCheck" Content="Tidal" Foreground="White" Margin="5"/>
@@ -64,8 +65,8 @@
                     </UniformGrid>
                 </Border>
 
-                <TextBlock Text="CONTENT CREATION" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="CONTENT CREATION" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="ObsCheck" Content="OBS Studio" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="StreamlabsCheck" Content="Streamlabs" Foreground="White" Margin="5"/>
@@ -74,8 +75,8 @@
                     </UniformGrid>
                 </Border>
 
-                <TextBlock Text="DEVELOPMENT TOOLS" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="DEVELOPMENT TOOLS" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="VsCodeCheck" Content="VS Code" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="NotepadCheck" Content="Notepad++" Foreground="White" Margin="5"/>
@@ -83,8 +84,8 @@
                     </UniformGrid>
                 </Border>
 
-                <TextBlock Text="MICROSOFT" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="MICROSOFT" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="CopilotCheck" Content="Copilot AI" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="MsStoreCheck" Content="MS Store" Foreground="White" Margin="5"/>
@@ -92,8 +93,8 @@
                     </UniformGrid>
                 </Border>
 
-                <TextBlock Text="SYSTEM TOOLS" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="SYSTEM TOOLS" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="WinrarCheck" Content="WinRAR" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="SevenZipCheck" Content="7-Zip" Foreground="White" Margin="5"/>
@@ -101,8 +102,8 @@
                     </UniformGrid>
                 </Border>
 
-                <TextBlock Text="MONITORING &amp; BENCHMARKS" Foreground="{StaticResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
-                <Border Background="{StaticResource BgPanel}" CornerRadius="12" BorderBrush="{StaticResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+                <TextBlock Text="MONITORING &amp; BENCHMARKS" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,10,0,10"/>
+                <Border Background="{DynamicResource BgPanel}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                     <UniformGrid Columns="3">
                         <CheckBox x:Name="HwinfoCheck" Content="HWiNFO" Foreground="White" Margin="5"/>
                         <CheckBox x:Name="HwmonitorCheck" Content="HWMonitor" Foreground="White" Margin="5"/>
@@ -117,10 +118,11 @@
             </StackPanel>
         </ScrollViewer>
 
-        <Border Grid.Row="2" Background="{StaticResource BgPanel}" Padding="20" BorderBrush="{StaticResource BorderCol}" BorderThickness="0,1,0,0">
-            <Button x:Name="BtnInstall" Content="Install Selected Applications" 
+        <Border Grid.Row="2" Background="{DynamicResource BgPanel}" Padding="20" BorderBrush="{DynamicResource BorderCol}" BorderThickness="0,1,0,0">
+            <Button x:Name="BtnInstall" 
+                    Content="Install Selected Applications" 
                     Height="45" Width="300" HorizontalAlignment="Right"
-                    Background="{StaticResource AccentBlue}" Foreground="White" FontWeight="Bold"
+                    Background="{DynamicResource AccentBlue}" Foreground="White" FontWeight="Bold"
                     Cursor="Hand" Click="BtnInstall_Click">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">

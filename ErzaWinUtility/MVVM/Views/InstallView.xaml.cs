@@ -8,8 +8,8 @@ using ErzaWinUtility.Services;
 namespace ErzaWinUtility.MVVM.Views
 {
     /// <summary>
-    /// Logic for automated software installation using Winget.
-    /// Maps UI CheckBoxes to official Winget Package IDs.
+    /// Interaction logic for InstallView.xaml.
+    /// Manages automated software deployment using the Windows Package Manager (Winget).
     /// </summary>
     public partial class InstallView : UserControl
     {
@@ -18,12 +18,19 @@ namespace ErzaWinUtility.MVVM.Views
             InitializeComponent();
         }
 
+        // ============================================================
+        // INSTALLATION LOGIC
+        // ============================================================
+
+        /// <summary>
+        /// Collects selected applications and initiates the Winget installation process.
+        /// </summary>
         private async void BtnInstall_Click(object sender, RoutedEventArgs e)
         {
             BtnInstall.IsEnabled = false;
             MainWindow.Log("INSTALLER", "Preparing installation queue...");
 
-            // Comprehensive mapping of UI CheckBoxes to Winget IDs
+            // Mapping UI CheckBoxes to official Winget Package IDs
             var appMappings = new Dictionary<CheckBox, string>
             {
                 // Browsers
@@ -65,7 +72,7 @@ namespace ErzaWinUtility.MVVM.Views
                 { NotepadCheck, "Notepad++.Notepad++" },
                 { ArduinoCheck, "Arduino.IDE.2" },
 
-                // Microsoft
+                // Microsoft Components
                 { CopilotCheck, "Microsoft.Copilot" },
                 { MsStoreCheck, "Microsoft.WindowsStore" },
                 { XboxCheck, "Microsoft.XboxApp" },
@@ -86,38 +93,50 @@ namespace ErzaWinUtility.MVVM.Views
             };
 
             int selectedCount = 0;
-            foreach (var app in appMappings)
+
+            try
             {
-                // Verification if the checkbox exists (failsafe) and is checked
-                if (app.Key != null && app.Key.IsChecked == true)
+                foreach (var app in appMappings)
                 {
-                    selectedCount++;
-                    string appName = app.Key.Content.ToString() ?? app.Value;
-
-                    MainWindow.Log("WINGET", $"Installing {appName}...");
-
-                    try
+                    // Check if the control is valid and selected by user
+                    if (app.Key != null && app.Key.IsChecked == true)
                     {
-                        await WingetService.InstallAppAsync(app.Value);
-                        MainWindow.Log("SUCCESS", $"{appName} installed successfully.");
-                    }
-                    catch (Exception ex)
-                    {
-                        MainWindow.Log("ERROR", $"Failed to install {appName}: {ex.Message}");
+                        selectedCount++;
+                        string appName = app.Key.Content?.ToString() ?? app.Value;
+
+                        MainWindow.Log("WINGET", $"Processing: {appName}");
+
+                        try
+                        {
+                            // Await the asynchronous installation from WingetService
+                            await WingetService.InstallAppAsync(app.Value);
+                            MainWindow.Log("SUCCESS", $"{appName} installation finished.");
+                        }
+                        catch (Exception ex)
+                        {
+                            MainWindow.Log("ERROR", $"Failed to install {appName}: {ex.Message}");
+                        }
                     }
                 }
-            }
 
-            if (selectedCount == 0)
-            {
-                MainWindow.Log("WARNING", "No applications selected for installation.");
+                // Final status reporting
+                if (selectedCount == 0)
+                {
+                    MainWindow.Log("WARNING", "No applications were selected.");
+                }
+                else
+                {
+                    MainWindow.Log("INSTALLER", $"Process completed. {selectedCount} applications processed.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MainWindow.Log("INSTALLER", $"Process finished. {selectedCount} apps processed.");
+                MainWindow.Log("FATAL", $"Installer engine error: {ex.Message}");
             }
-
-            BtnInstall.IsEnabled = true;
+            finally
+            {
+                BtnInstall.IsEnabled = true;
+            }
         }
     }
 }

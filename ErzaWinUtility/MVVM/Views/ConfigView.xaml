@@ -22,7 +22,7 @@
                                 <Setter TargetName="Bd" Property="Background" Value="#2A2A38"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#4A7FD4"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentBlue}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -47,7 +47,7 @@
                                 <ToggleButton.Template>
                                     <ControlTemplate TargetType="ToggleButton">
                                         <Border Name="Border" CornerRadius="4" Background="#1A1A25" BorderBrush="#2A2A38" BorderThickness="1">
-                                            <Path Name="Arrow" Fill="#4A7FD4" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Data="M0,0 L4,4 L8,0 Z"/>
+                                            <Path Name="Arrow" Fill="{DynamicResource AccentBlue}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0" Data="M0,0 L4,4 L8,0 Z"/>
                                         </Border>
                                     </ControlTemplate>
                                 </ToggleButton.Template>
@@ -71,47 +71,50 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
             <TextBlock Text="Additional Configuration" Foreground="White" FontSize="28" FontWeight="Bold" Margin="0,0,0,5"/>
-            <TextBlock Text="Customize system behavior and network settings." Foreground="#8888A0" FontSize="12" Margin="0,0,0,25"/>
+            <TextBlock Text="Customize system behavior and network settings." Foreground="{DynamicResource TextSecondary}" FontSize="12" Margin="0,0,0,25"/>
 
-            <TextBlock Text="SECURITY &amp; SYSTEM" Foreground="#4A7FD4" FontSize="12" FontWeight="Bold" Margin="0,0,0,10"/>
-            <Border Background="#0C0C11" CornerRadius="12" BorderBrush="#2A2A38" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+            <TextBlock Text="SECURITY &amp; SYSTEM" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,0,0,10"/>
+            <Border Background="{DynamicResource CardBackground}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                 <StackPanel>
                     <Grid Margin="0,10">
                         <StackPanel>
                             <TextBlock Text="Detailed BSoD" Foreground="White" FontSize="14"/>
-                            <TextBlock Text="Show technical info on crash." Foreground="#8888A0" FontSize="11"/>
+                            <TextBlock Text="Show technical info on crash." Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
                         </StackPanel>
                         <CheckBox x:Name="BsodToggle" HorizontalAlignment="Right" Style="{StaticResource ModernToggleStyle}" Click="BsodToggle_Click"/>
                     </Grid>
                     <Separator Background="#1A1A25" Margin="0,10"/>
+
                     <Grid Margin="0,10">
                         <StackPanel>
                             <TextBlock Text="System Hibernation" Foreground="White" FontSize="14"/>
-                            <TextBlock Text="Manage hiberfil.sys." Foreground="#8888A0" FontSize="11"/>
+                            <TextBlock Text="Manage hiberfil.sys." Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
                         </StackPanel>
                         <CheckBox x:Name="HibernationToggle" HorizontalAlignment="Right" Style="{StaticResource ModernToggleStyle}" Click="HibernationToggle_Click"/>
                     </Grid>
                     <Separator Background="#1A1A25" Margin="0,10"/>
+
                     <Grid Margin="0,10">
                         <StackPanel>
                             <TextBlock Text="System Protection" Foreground="White" FontSize="14"/>
-                            <TextBlock Text="Restore points for C:" Foreground="#8888A0" FontSize="11"/>
+                            <TextBlock Text="Restore points for C:" Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
                         </StackPanel>
                         <CheckBox x:Name="ProtectionToggle" HorizontalAlignment="Right" Style="{StaticResource ModernToggleStyle}" Click="ProtectionToggle_Click"/>
                     </Grid>
                     <Separator Background="#1A1A25" Margin="0,10"/>
+
                     <Grid Margin="0,10">
                         <StackPanel>
                             <TextBlock Text="Core Isolation" Foreground="#FF6B6B" FontSize="14"/>
-                            <TextBlock Text="Reduces security if OFF." Foreground="#8888A0" FontSize="11"/>
+                            <TextBlock Text="Reduces security if OFF." Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
                         </StackPanel>
                         <CheckBox x:Name="CoreIsolationToggle" HorizontalAlignment="Right" Style="{StaticResource ModernToggleStyle}" Click="CoreIsolationToggle_Click"/>
                     </Grid>
                 </StackPanel>
             </Border>
 
-            <TextBlock Text="INTERFACE &amp; MOUSE" Foreground="#4A7FD4" FontSize="12" FontWeight="Bold" Margin="0,0,0,10"/>
-            <Border Background="#0C0C11" CornerRadius="12" BorderBrush="#2A2A38" BorderThickness="1" Padding="20" Margin="0,0,0,20">
+            <TextBlock Text="INTERFACE &amp; MOUSE" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,0,0,10"/>
+            <Border Background="{DynamicResource CardBackground}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="20" Margin="0,0,0,20">
                 <StackPanel>
                     <Grid Margin="0,10">
                         <Button Content="Mouse Settings" Click="MouseSettings_Click" Width="150" HorizontalAlignment="Left" Height="35" Background="#1A1A25" Foreground="White" BorderBrush="#2A2A38"/>
@@ -121,18 +124,19 @@
                         </StackPanel>
                     </Grid>
                     <Separator Background="#1A1A25" Margin="0,10"/>
+
                     <Grid Margin="0,10">
                         <StackPanel>
                             <TextBlock Text="Show Hidden Files" Foreground="White" FontSize="14"/>
-                            <TextBlock Text="Visible files and extensions." Foreground="#8888A0" FontSize="11"/>
+                            <TextBlock Text="Visible files and extensions." Foreground="{DynamicResource TextSecondary}" FontSize="11"/>
                         </StackPanel>
                         <CheckBox x:Name="HiddenFilesToggle" HorizontalAlignment="Right" Style="{StaticResource ModernToggleStyle}" Click="HiddenFilesToggle_Click"/>
                     </Grid>
                 </StackPanel>
             </Border>
 
-            <TextBlock Text="DNS CONFIGURATION" Foreground="#4A7FD4" FontSize="12" FontWeight="Bold" Margin="0,0,0,10"/>
-            <Border Background="#0C0C11" CornerRadius="12" BorderBrush="#2A2A38" BorderThickness="1" Padding="15">
+            <TextBlock Text="DNS CONFIGURATION" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Bold" Margin="0,0,0,10"/>
+            <Border Background="{DynamicResource CardBackground}" CornerRadius="12" BorderBrush="{DynamicResource BorderCol}" BorderThickness="1" Padding="15">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="🌐" Foreground="White" VerticalAlignment="Center" Margin="0,0,15,0"/>
                     <ComboBox x:Name="DnsSelector" Width="600" Height="40" Style="{StaticResource DnsComboBoxStyle}" SelectionChanged="DnsSelector_SelectionChanged">

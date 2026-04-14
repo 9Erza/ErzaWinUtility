@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -51,7 +52,7 @@ namespace ErzaWinUtility.MVVM.Views
 
             try
             {
-                // Note: Actual implementation would call a WMI or PowerShell script via RegistryService
+                // Execute restore point creation on a background thread
                 await Task.Run(() => RegistryService.CreateRestorePoint("ErzaUtility_PreOptimization"));
 
                 MainWindow.Log("SUCCESS", "System Restore Point created successfully.");
@@ -75,7 +76,7 @@ namespace ErzaWinUtility.MVVM.Views
             // First, clear all existing selections
             BtnProfileClear_Click(null, null);
 
-            // Select recommended tweaks as requested
+            // Select recommended tweaks
             TweakTempFiles.IsChecked = true;
             TweakConsumerFeatures.IsChecked = true;
             TweakLocation.IsChecked = true;
@@ -119,8 +120,7 @@ namespace ErzaWinUtility.MVVM.Views
 
             try
             {
-                // Mapping checkboxes to their specific RegistryService actions
-                // We use a simple sequential approach for transparency in logs
+                // Run registry modifications on a background thread
                 await Task.Run(() =>
                 {
                     if (CheckState(TweakTempFiles)) RegistryService.CleanupTempFiles();
@@ -152,7 +152,7 @@ namespace ErzaWinUtility.MVVM.Views
         }
 
         /// <summary>
-        /// Helper to check checkbox state safely across threads if needed.
+        /// Safely checks the checkbox state from a background thread using the Dispatcher.
         /// </summary>
         private bool CheckState(CheckBox cb)
         {
@@ -169,14 +169,14 @@ namespace ErzaWinUtility.MVVM.Views
         {
             try
             {
-                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                var assembly = Assembly.GetExecutingAssembly();
                 string resourceName = "ErzaWinUtility.Resources.Erza_PowerPlan.pow";
 
                 using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null)
                     {
-                        MainWindow.Log("ERROR", "Power Plan resource missing.");
+                        MainWindow.Log("ERROR", "Power Plan resource missing from assembly.");
                         return;
                     }
 

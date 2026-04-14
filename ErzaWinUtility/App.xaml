@@ -7,11 +7,11 @@
 
         <SolidColorBrush x:Key="BgMain" Color="#111116"/>
         <SolidColorBrush x:Key="BgPanel" Color="#0C0C11"/>
+        <SolidColorBrush x:Key="CardBackground" Color="#0C0C11"/>
         <SolidColorBrush x:Key="AccentBlue" Color="#4A7FD4"/>
         <SolidColorBrush x:Key="TextPrimary" Color="#E8E8F0"/>
         <SolidColorBrush x:Key="TextSecondary" Color="#8888A0"/>
         <SolidColorBrush x:Key="BorderCol" Color="#2A2A38"/>
-
 
         <Style x:Key="NavButtonStyle" TargetType="RadioButton">
             <Setter Property="Height" Value="45"/>
@@ -61,6 +61,17 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="ActionButton" TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#5A8FE4"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
         <Style x:Key="ModernToggleStyle" TargetType="CheckBox">
             <Setter Property="Width" Value="45"/>
@@ -81,7 +92,7 @@
                         </BulletDecorator>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Background" Property="Background" Value="#4A7FD4"/>
+                                <Setter TargetName="Background" Property="Background" Value="{StaticResource AccentBlue}"/>
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>

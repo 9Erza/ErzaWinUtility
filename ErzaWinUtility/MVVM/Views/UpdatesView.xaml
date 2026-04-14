@@ -1,23 +1,81 @@
 ﻿<UserControl x:Class="ErzaWinUtility.MVVM.Views.UpdatesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="900">
 
-    <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
             <TextBlock Text="System Updates &amp; Components" 
                        Foreground="White" 
-                       FontSize="24" 
+                       FontSize="28" 
                        FontWeight="Bold" 
-                       HorizontalAlignment="Center" 
-                       Margin="0,0,0,10"/>
-            <TextBlock Text="Feature under development. Stay tuned for Erza Engine updates." 
-                       Foreground="{StaticResource TextSecondary}" 
+                       Margin="0,0,0,5"/>
+
+            <TextBlock Text="Manage Windows Update behavior and repair component corruption." 
+                       Foreground="{DynamicResource TextSecondary}" 
                        FontSize="14" 
-                       HorizontalAlignment="Center"/>
+                       Margin="0,0,0,25"/>
+
+            <Border Background="{DynamicResource CardBackground}" 
+                    CornerRadius="8" 
+                    Padding="20" 
+                    Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Update Control" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                    <DockPanel Margin="0,0,0,10">
+                        <StackPanel DockPanel.Dock="Left">
+                            <TextBlock Text="Pause Windows Updates" Foreground="White" FontSize="16"/>
+                            <TextBlock Text="Disables Windows Update service and prevents automatic downloads." 
+                                       Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                        </StackPanel>
+                        <Button Content="Pause Updates" 
+                                HorizontalAlignment="Right" 
+                                Width="120" Height="32"
+                                Style="{DynamicResource ActionButton}"
+                                Click="BtnPauseUpdates_Click"/>
+                    </DockPanel>
+
+                    <Separator Background="#333" Margin="0,10"/>
+
+                    <DockPanel Margin="0,10,0,0">
+                        <StackPanel DockPanel.Dock="Left">
+                            <TextBlock Text="Resume Windows Updates" Foreground="White" FontSize="16"/>
+                            <TextBlock Text="Restores default Windows Update behavior." 
+                                       Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                        </StackPanel>
+                        <Button Content="Resume Updates" 
+                                HorizontalAlignment="Right" 
+                                Width="120" Height="32"
+                                Style="{DynamicResource ActionButton}"
+                                Click="BtnResumeUpdates_Click"/>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Background="{DynamicResource CardBackground}" 
+                    CornerRadius="8" 
+                    Padding="20">
+                <StackPanel>
+                    <TextBlock Text="Maintenance &amp; Repair" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+
+                    <DockPanel Margin="0,0,0,10">
+                        <StackPanel DockPanel.Dock="Left">
+                            <TextBlock Text="Reset Windows Update" Foreground="White" FontSize="16"/>
+                            <TextBlock Text="Clears update cache and restarts services. Useful for stuck updates." 
+                                       Foreground="{DynamicResource TextSecondary}" FontSize="12"/>
+                        </StackPanel>
+                        <Button Content="Reset Components" 
+                                HorizontalAlignment="Right" 
+                                Width="150" Height="32"
+                                Style="{DynamicResource ActionButton}"
+                                Click="BtnResetUpdates_Click"/>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>
